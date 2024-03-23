@@ -116,7 +116,7 @@ services:
     build:
       args:
         progress: plain
-      context: ./main-service/MainService
+      context: ./main-service
       dockerfile: ./Dockerfile
     depends_on:
       - database
