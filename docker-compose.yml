@@ -90,8 +90,8 @@ services:
       - backend
     restart: always
     ports:
-      - '5000:5000'
-      - '5001:5001'
+      - '8080:8080'
+      - '8081:8081'
     environment:
       - ASPNETCORE_ENVIRONMENT=Release
     deploy:
