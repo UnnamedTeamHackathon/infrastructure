@@ -1,0 +1,146 @@
+version: '3.9'
+services:
+  compiler:
+    build:
+      context: ./compile-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "7777:8082"
+    networks:
+      - backend
+    depends_on:
+      - storage-service
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - compiler:/compiler
+    environment:
+      - DELETE_DOCKER_IMAGE=true
+      - EXECUTION_MEMORY_MAX=10000
+      - EXECUTION_MEMORY_MIN=0
+      - EXECUTION_TIME_MAX=15
+      - EXECUTION_TIME_MIN=0
+      - MAX_REQUESTS=1000
+      - MAX_EXECUTION_CPUS=0.2
+      - COMPILATION_CONTAINER_VOLUME=compiler
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+    volumes:
+      - ./scoped/nginx/data:/data
+      - ./scoped/nginx/letsencrypt:/etc/letsencrypt
+  
+  database:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'production'
+    networks:
+      - backend
+    ports:
+      - '5430:5432'
+    volumes:
+      - database-pg:/var/lib/postgresql/data
+      - ./scoped/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  storage-service:
+    build:
+      args:
+        progress: plain
+      context: ./storage-service
+      dockerfile: ./Dockerfile
+    networks:
+      - backend
+    restart: always
+    ports:
+      #- '127.0.0.1:3000:3000'  доступ к S3 сервису будет только внутри сети docker 
+      - '3000:3000'
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
+
+  tasks-service:
+    build:
+      args:
+        progress: plain
+      context: ./tasks-service
+      dockerfile: ./Dockerfile
+    depends_on:
+      - storage-service
+    networks:
+      - backend
+    restart: always
+    ports:
+      - '3001:3001'
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
+
+  award-service:
+    build:
+      args:
+        progress: plain
+      context: ./award-service
+      dockerfile: ./Dockerfile
+    depends_on:
+      - storage-service
+    networks:
+      - backend
+    restart: always
+    ports:
+      - '3002:3002'
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
+
+  main-service:
+    build:
+      args:
+        progress: plain
+      context: ./main-service/MainService
+      dockerfile: ./Dockerfile
+    depends_on:
+      - database
+      - storage-service
+    networks:
+      - backend
+    restart: always
+    ports:
+      - '5000:5000'
+      - '5001:5001'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Release
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 1024m
+        reservations:
+          memory: 512m
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  database-pg:
+  compiler:
