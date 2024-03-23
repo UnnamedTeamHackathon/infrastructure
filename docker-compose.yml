@@ -1,40 +1,5 @@
 version: '3.9'
 services:
-  compiler:
-    build:
-      context: ./compile-service
-      dockerfile: ./Dockerfile
-    ports:
-      - "7777:8082"
-    networks:
-      - backend
-    depends_on:
-      - storage-service
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - compiler:/compiler
-    environment:
-      - DELETE_DOCKER_IMAGE=true
-      - EXECUTION_MEMORY_MAX=10000
-      - EXECUTION_MEMORY_MIN=0
-      - EXECUTION_TIME_MAX=15
-      - EXECUTION_TIME_MIN=0
-      - MAX_REQUESTS=1000
-      - MAX_EXECUTION_CPUS=0.2
-      - COMPILATION_CONTAINER_VOLUME=compiler
-
-  nginx:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    ports:
-      # These ports are in format <host-port>:<container-port>
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
-    volumes:
-      - ./scoped/nginx/data:/data
-      - ./scoped/nginx/letsencrypt:/etc/letsencrypt
-  
   database:
     image: postgres:16
     restart: always
@@ -143,4 +108,3 @@ networks:
 
 volumes:
   database-pg:
-  compiler:
