@@ -112,7 +112,9 @@ services:
       - /usr/bin/docker:/usr/bin/docker
     network_mode: host
     ports:
-      - 1337:8080
+      - 1337:1337
+    environment:
+      - JENKINS_OPTS="--httpPort=1337"
     restart: always
 
   nginx:
