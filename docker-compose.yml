@@ -112,9 +112,7 @@ services:
       - /usr/bin/docker:/usr/bin/docker
     network_mode: host
     ports:
-      - 1337:1337
-    environment:
-      - SERVER.PORT=1337
+      - 1337:8080
     restart: always
 
   nginx:
