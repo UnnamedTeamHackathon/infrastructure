@@ -105,6 +105,7 @@ services:
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins_lts
+    user: root
     volumes:
       - ./jenkins_home/:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock:rw
