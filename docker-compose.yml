@@ -101,6 +101,20 @@ services:
           memory: 1024m
         reservations:
           memory: 512m
+  
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins_lts
+    volumes:
+      - ./jenkins_home/:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /usr/bin/docker:/usr/bin/docker
+    network_mode: host
+    ports:
+      - 1337:1337
+    environment:
+      - SERVER.PORT=1337
+    restart: always
 
   nginx:
     image: 'jc21/nginx-proxy-manager:latest'
