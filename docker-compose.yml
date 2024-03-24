@@ -85,7 +85,6 @@ services:
       - backend
     restart: always
     ports:
-      #- '127.0.0.1:3000:3000'  доступ к S3 сервису будет только внутри сети docker 
       - '3000:3000'
     deploy:
       replicas: 1
