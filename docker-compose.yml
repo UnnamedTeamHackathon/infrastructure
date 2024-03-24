@@ -95,6 +95,25 @@ services:
         reservations:
           memory: 256m
 
+  award-consumer-service:
+    build:
+      args:
+        progress: plain
+      context: ./award-consumer-service
+      dockerfile: ./Dockerfile
+    networks:
+      - backend
+    restart: always
+    ports:
+      - '3003:3003'
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 256m
+
   tasks-service:
     build:
       args:
@@ -108,27 +127,6 @@ services:
     restart: always
     ports:
       - '3001:3001'
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 512m
-        reservations:
-          memory: 256m
-
-  award-service:
-    build:
-      args:
-        progress: plain
-      context: ./award-service
-      dockerfile: ./Dockerfile
-    depends_on:
-      - storage-service
-    networks:
-      - backend
-    restart: always
-    ports:
-      - '3002:3002'
     deploy:
       replicas: 1
       resources:
